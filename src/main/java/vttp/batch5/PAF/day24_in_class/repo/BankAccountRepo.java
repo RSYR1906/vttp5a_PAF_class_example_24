@@ -27,9 +27,24 @@ public class BankAccountRepo {
         }
     }
 
-    public BankAccount getAccountById(int accountId){
-        try{
-            
+    public BankAccount getAccountById(int accountId) {
+        try {
+            BankAccount account = template.queryForObject(Queries.selectByBankAccountIdSQL,
+                    BeanPropertyRowMapper.newInstance(BankAccount.class), accountId);
+
+            return account;
+        } catch (DataAccessException ex) {
+            throw new AccountNotFoundException("Account with id " + accountId + " does not exist.");
         }
+    }
+
+    public Boolean updateAccountById(BankAccount accountToUpdate) {
+        int accountUpdated = template.update(Queries.updateBankAccountByIdSQL, accountToUpdate.getBalance(),
+                accountToUpdate.getId());
+
+        if (accountUpdated > 0) {
+            return true;
+        }
+        return false;
     }
 }
